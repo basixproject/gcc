@@ -1940,6 +1940,12 @@ hppa*64*-*-hpux11*)
 		;;
 	esac
 	;;
+i[34567]86-*-basix*)
+	tm_file="${tm_file} i386/unix.h i386/att.h elfos.h glibc-stdint.h i386/i386elf.h basix.h"
+	;;
+x86_64-*-basix*)
+	tm_file="${tm_file} i386/unix.h i386/att.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h basix.h"
+	;;
 i[34567]86-*-darwin1[89]* | i[34567]86-*-darwin2*)
 	echo "Error: 32bit target is not supported after Darwin17" 1>&2
 	;;
