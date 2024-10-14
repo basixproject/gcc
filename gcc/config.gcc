@@ -727,6 +727,13 @@ x86_cpus="generic intel"
 
 # Common parts for widely ported systems.
 case ${target} in
+*-*-basix*)
+  extra_options="$extra_options gnu-user.opt"
+  gas=yes
+  gnu_ld=yes
+  default_use_cxa_atexit=yes
+  use_gcc_stdint=provide
+  ;;
 *-*-darwin*)
   tmake_file="t-darwin "
   tm_file="${tm_file} darwin.h"
