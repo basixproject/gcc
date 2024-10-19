@@ -18144,7 +18144,7 @@
 	    [(match_operand:VI_128_256 3 "nonimmediate_operand")
 	     (match_operand:VI_128_256 4 "nonimmediate_operand")
 	     (match_operand:SI 5 "const_0_to_7_operand")]
-	     UNSPEC_PCMP_ITER)))]
+	     UNSPEC_PCMP)))]
   "TARGET_AVX512VL && ix86_pre_reload_split ()
      /* NE is commutative.  */
    && (INTVAL (operands[5]) == 4
@@ -18163,6 +18163,31 @@
     operands[3] = force_reg (<MODE>mode, operands[3]);
   enum rtx_code code = INTVAL (operands[5]) != 4 ? GT : EQ;
   emit_move_insn (operands[0], gen_rtx_fmt_ee (code, <MODE>mode,
+					       operands[3], operands[4]));
+  DONE;
+})
+
+(define_insn_and_split "*avx2_pcmp<mode>3_8"
+ [(set (match_operand:VI_128_256  0 "register_operand")
+	(vec_merge:VI_128_256
+	  (match_operand:VI_128_256 1 "const0_operand")
+	  (match_operand:VI_128_256 2 "vector_all_ones_operand")
+	  (unspec:<avx512fmaskmode>
+	    [(match_operand:VI_128_256 3 "nonimmediate_operand")
+	     (match_operand:VI_128_256 4 "nonimmediate_operand")
+	     (match_operand:SI 5 "const_0_to_7_operand")]
+	     UNSPEC_UNSIGNED_PCMP)))]
+  "TARGET_AVX512VL && ix86_pre_reload_split ()
+     /* NE is commutative.  */
+   && INTVAL (operands[5]) == 4"
+
+  "#"
+  "&& 1"
+  [(const_int 0)]
+{
+  if (MEM_P (operands[3]))
+    operands[3] = force_reg (<MODE>mode, operands[3]);
+  emit_move_insn (operands[0], gen_rtx_fmt_ee (EQ, <MODE>mode,
 					       operands[3], operands[4]));
   DONE;
 })
@@ -32341,8 +32366,12 @@
 (define_insn "avx10_2_comsbf16_v8bf"
   [(set (reg:CCFP FLAGS_REG)
 	(unspec:CCFP
-	  [(match_operand:V8BF 0 "register_operand" "v")
-	   (match_operand:V8BF 1 "nonimmediate_operand" "vm")]
+	  [(vec_select:BF
+	     (match_operand:V8BF 0 "register_operand" "v")
+	     (parallel [(const_int 0)]))
+	   (vec_select:BF
+	     (match_operand:V8BF 1 "nonimmediate_operand" "vm")
+	     (parallel [(const_int 0)]))]
 	 UNSPEC_VCOMSBF16))]
   "TARGET_AVX10_2_256"
   "vcomsbf16\t{%1, %0|%0, %1}"
